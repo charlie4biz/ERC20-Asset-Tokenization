@@ -1,6 +1,4 @@
-# For Asset and security tokenization using ERC20 with Authorization using Multi-sig Approvers
-
-## To-Do
+## For Asset and security tokenization using ERC20 with Authorization using Multi-sig Approvers
 ## To-Do List
 - [x] Create Proxy contract for upgradeability
 - [x] Separate Contract database from the Logic Contracts
@@ -51,16 +49,13 @@
 ## Authorizer Features
 - [x] Approve Mint Schedule
 - [x] UnApprove Mint Schedule
-- [ ] 
 
 ## Admin Features
 - [x] Create Mint Schedule
 - [x] Generate and Distribute Approved Minted Lien Tokens
 - [x] Manage WhiteList of users (Pause user's activities)
 - [x] Transfer tradeable tokens from one user account to another
-- [ ] 
 
 ## User Features
 - [x] Transfer Tradeable Tokens to other users
 - [x] Approve admin to transfer token after creating a Sell Order
-- [ ] 
