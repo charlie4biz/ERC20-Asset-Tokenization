@@ -1,4 +1,4 @@
-const { ADLogin, SterlingTokenContract, ADProfile } = require('../services');
+const { ADLogin, SharesTokenContract, ADProfile } = require('../services');
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, SerializeAD, DeSensitizeUserPlus, DeSensitize, SerializeXML } = require('../utils');
 const { WalletModel, TradingWindowModel, TradeModel, TransactionModel, UserModel, SharePriceModel } = require('../models');
 
@@ -33,7 +33,7 @@ const DashboardController = {
       const tradingWindow = await TradingWindowModel.findOne({isOpen : true})
 
       // Get Shares Wallet Info
-      const userShareBalance = await SterlingTokenContract.balanceOf(req.authUser.address)
+      const userShareBalance = await SharesTokenContract.balanceOf(req.authUser.address)
       GetLoggerInstance().info(`Response from web3 balanceOf : ${JSON.stringify(userShareBalance)}`)
 
       // Get All Open Sale
@@ -106,7 +106,7 @@ const DashboardController = {
 
       let responseBody = {}
 
-      const sharesCount = await SterlingTokenContract.getTotalSupply()
+      const sharesCount = await SharesTokenContract.getTotalSupply()
       GetLoggerInstance().info(`Response from web3 getShareCount : ${JSON.stringify(sharesCount)}`)
       
       // Get Trading Window

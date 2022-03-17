@@ -19,7 +19,7 @@ Trace:
 
 npm manifest: 
   {
-    "name": "sterling-blockchain",
+    "name": "Shares-blockchain",
     "version": "0.1.0",
     "private": true,
     "scripts": {

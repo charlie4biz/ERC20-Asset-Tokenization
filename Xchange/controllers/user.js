@@ -1,7 +1,7 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, AddToCache, GetFromCache, AddOrUpdateUserCache, DeSensitizeUserPlus } = require('../utils')
 const { UserModel, TradeModel, WalletModel } = require('../models')
 const { ADProfile, VerifyOTP } = require('../services');
-const { SterlingTokenContract } = require('../services')
+const { SharesTokenContract } = require('../services')
 const bcrypt = require("bcrypt");
 
 const UserController = {
@@ -97,7 +97,7 @@ const UserController = {
         }
 
         // Get Shares Wallet Info
-        let shareWallet = await SterlingTokenContract.balanceOf(user.address)
+        let shareWallet = await SharesTokenContract.balanceOf(user.address)
         GetLoggerInstance().info(`Response from web3 balanceOf : ${JSON.stringify(shareWallet)}`)
 
         responseBody = {
@@ -214,9 +214,9 @@ const UserController = {
         let chainResponse 
         if (req.authUser.userRole == UserModel.UserType.ADMIN) {
             const web3Pass = await Decrypt(req.authUser.password)
-            chainResponse = await SterlingTokenContract.setWhiteList(user.address, req.authUser.address, web3Pass)
+            chainResponse = await SharesTokenContract.setWhiteList(user.address, req.authUser.address, web3Pass)
         } else {
-            chainResponse = await SterlingTokenContract.setWhiteList(user.address, req.authUser.address)
+            chainResponse = await SharesTokenContract.setWhiteList(user.address, req.authUser.address)
         }
         GetLoggerInstance().info(`Response from web3 setWhiteList : ${JSON.stringify(chainResponse)}`)
         chainResponse = (chainResponse.hasOwnProperty("error")) ? {} : chainResponse
@@ -266,9 +266,9 @@ const UserController = {
         let chainResponse 
         if (req.authUser.userRole == UserModel.UserType.ADMIN) {
             const web3Pass = await Decrypt(req.authUser.password)
-            chainResponse = await SterlingTokenContract.removeWhiteList(user.address, req.authUser.address, web3Pass)
+            chainResponse = await SharesTokenContract.removeWhiteList(user.address, req.authUser.address, web3Pass)
         } else {
-            chainResponse = await SterlingTokenContract.removeWhiteList(user.address, req.authUser.address)
+            chainResponse = await SharesTokenContract.removeWhiteList(user.address, req.authUser.address)
         }
         GetLoggerInstance().info(`Response from web3 removeWhiteList : ${JSON.stringify(chainResponse)}`)
         

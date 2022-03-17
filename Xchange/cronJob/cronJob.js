@@ -1,6 +1,6 @@
 const cron = require('node-cron')
 const { AllocationModel, UserModel, ScheduleModel, TradeModel, WalletModel, TransactionModel } = require('../models');
-const { SterlingTokenContract } = require('../services');
+const { SharesTokenContract } = require('../services');
 const { HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, RabbitMQService, Decrypt } = require('../utils');
 
 exports.AllocationJob = () => {
@@ -38,7 +38,7 @@ exports.AllocationJob = () => {
                     }
                     
                      
-                    let scheduleChainInfo = await SterlingTokenContract.getschedule(schedule.scheduleId, Config.SuperAdmin, "")
+                    let scheduleChainInfo = await SharesTokenContract.getschedule(schedule.scheduleId, Config.SuperAdmin, "")
                     if (parseInt(scheduleChainInfo.amount) < parseInt(entry.amount)) {
                         allocation.comment = "Minting Failed, Schedule has insuffient amount ("+scheduleChainInfo.amount+") to mint"
                         allocation.status = AllocationModel.Status.FAILED
@@ -48,7 +48,7 @@ exports.AllocationJob = () => {
 
                     // Call blockchain to mint token
                     GetLoggerInstance().info(`Cron Job Request to web3 generateToken : ${schedule.scheduleId, user.address, entry.amount, Config.SuperAdmin, ""}`)
-                    let chainResponse = await SterlingTokenContract.generateToken(schedule.scheduleId, user.address, entry.amount, Config.SuperAdmin, "")
+                    let chainResponse = await SharesTokenContract.generateToken(schedule.scheduleId, user.address, entry.amount, Config.SuperAdmin, "")
                     GetLoggerInstance().info(`web3 generateToken response to cron job : ${JSON.stringify(chainResponse)}`)
 
                     if (!chainResponse) {
@@ -70,7 +70,7 @@ exports.AllocationJob = () => {
                     // Send Email To User 
                     RabbitMQService.queue('SEND_USERS_MAIL_ON_SCHEDULE_ALLOCATION', { user : emailParams })
                     
-                    scheduleChainInfo = await SterlingTokenContract.getschedule(schedule.scheduleId, Config.SuperAdmin, "")
+                    scheduleChainInfo = await SharesTokenContract.getschedule(schedule.scheduleId, Config.SuperAdmin, "")
                     if (parseInt(scheduleChainInfo.amount) == 0) {
                         schedule.status = ScheduleModel.Status.COMPLETED
                         await schedule.save()
@@ -108,7 +108,7 @@ exports.AllocationJob = () => {
     //                 {
 
     //              // Ensures Seller Has Enough Shares To Sell
-    //             let sellerBalance = await SterlingTokenContract.balanceOf(sellerInfo.address)
+    //             let sellerBalance = await SharesTokenContract.balanceOf(sellerInfo.address)
 
                     
     //                 const buyerInfo = await UserModel.findById(openBuyTrade.userId)
@@ -121,7 +121,7 @@ exports.AllocationJob = () => {
     //                 // debit seller share wallet and credit buyer share wallet
     //                 let chainPass = await Decrypt(sellerInfo.password)
     //                 GetLoggerInstance().info(`Request to web3 transfer : ${buyerInfo.address, quantity, sellerInfo.address, chainPass}`)
-    //                 let chainResponse = await SterlingTokenContract.transfer(buyerInfo.address, quantity, sellerInfo.address, chainPass)
+    //                 let chainResponse = await SharesTokenContract.transfer(buyerInfo.address, quantity, sellerInfo.address, chainPass)
     //                 GetLoggerInstance().info(`Response from web3 transfer : ${JSON.stringify(chainResponse)}`)
 
     // transactionSell = async (sellerInfo, buyerInfo,amountToPay, quantity, openBuyTrade, tradetype)=>{

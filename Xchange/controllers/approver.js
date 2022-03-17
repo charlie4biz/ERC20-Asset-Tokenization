@@ -1,6 +1,6 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, AddToCache, GetFromCache, AddOrUpdateUserCache } = require('../utils')
 const { WalletModel, UserModel, TransactionModel } = require('../models')
-const { SterlingTokenContract } = require('../services')
+const { SharesTokenContract } = require('../services')
 
 const ApproverController = {
 
@@ -74,7 +74,7 @@ const ApproverController = {
         }
 
         // update blockchain record
-        const chainResponse = await SterlingTokenContract.addAuthorizer(user.address, req.authUser.address)
+        const chainResponse = await SharesTokenContract.addAuthorizer(user.address, req.authUser.address)
         GetLoggerInstance().info(`Response from web3 addApprover : ${JSON.stringify(chainResponse)}`)
         user.userRole = UserModel.UserType.APPROVER
         await user.save()
@@ -116,7 +116,7 @@ const ApproverController = {
         }
 
         // update blockchain record
-        const chainResponse = await SterlingTokenContract.removeAuthorizer(user.address, req.authUser.address)
+        const chainResponse = await SharesTokenContract.removeAuthorizer(user.address, req.authUser.address)
         GetLoggerInstance().info(`Response from web3 addApprover : ${JSON.stringify(chainResponse)}`)
         user.userRole = UserModel.UserType.USER
         await user.save()

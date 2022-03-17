@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-const debug = require('debug')('sterlingToken:server');
+const debug = require('debug')('SharesToken:server');
 const http = require('http');
 const https = require('https');
 const app = require('./server')

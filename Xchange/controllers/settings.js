@@ -1,6 +1,6 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, Random, Encrypt, Decrypt, RabbitMQService } = require('../utils');
 const { WalletModel, UserModel, TransactionModel, AdminSettingsModel, TradeModel, TradingWindowModel, ScheduleModel, AllocationModel, SharePriceModel } = require('../models');
-const { SterlingTokenContract, SendOTP } = require('../services');
+const { SharesTokenContract, SendOTP } = require('../services');
 const XLSX = require("xlsx")
 const fs = require("fs")
 
@@ -131,13 +131,13 @@ const settingsController = {
                 let user = users[i]
 
                 // move all user shares in escrow back to user share wallet
-                // await SterlingTokenContract.moveEscrow(user.address)
+                // await SharesTokenContract.moveEscrow(user.address)
 
                 // Cancel all user open trades 
                 const openTrades = await TradeModel.find({userId : user._id, isOpen : true, windowId : tradingWindow._id})
                 if(openTrades.length > 0) {
                   openTrades.forEach(async (trade) => {
-                    await SterlingTokenContract.transferFrom(user.address, user.address, trade.volume)
+                    await SharesTokenContract.transferFrom(user.address, user.address, trade.volume)
                     const tradeToCancel = await TradeModel.findOne({_id : trade._id})
                     tradeToCancel.isCancel = true
                     tradeToCancel.isOpen = false
@@ -146,7 +146,7 @@ const settingsController = {
                 }
 
                 // Get user current share balance to be exported
-                let shareWallet = await SterlingTokenContract.balanceOf(user.address)
+                let shareWallet = await SharesTokenContract.balanceOf(user.address)
                 GetLoggerInstance().info(`Response from web3 balanceOf : ${JSON.stringify(shareWallet)}`)
                 
                 dataToExport.push({
@@ -156,7 +156,7 @@ const settingsController = {
                 })
 
                 // Re-initialize users share balance to zero
-                await SterlingTokenContract.zeroBalance(user.address)
+                await SharesTokenContract.zeroBalance(user.address)
                 
                 if (i == users.length - 1) {
                   return resolve(dataToExport)
@@ -227,7 +227,7 @@ const settingsController = {
         GetLoggerInstance().info(`Incoming Request For SetApprovalRequirements : ${JSON.stringify(requestBody)} `)
 
         
-        const chainResponse = await SterlingTokenContract.changeRequirement(requestBody.requirement, Config.SuperAdmin)
+        const chainResponse = await SharesTokenContract.changeRequirement(requestBody.requirement, Config.SuperAdmin)
         GetLoggerInstance().info(`Response from web3 changeRequirement : ${JSON.stringify(chainResponse)}`)
 
         GetLoggerInstance().info(`Outgoing Response To SetApprovalRequirements Request : ${GetCodeMsg(Errors.SUCCESS)} `)
@@ -263,7 +263,7 @@ const settingsController = {
         GetLoggerInstance().info(`Incoming Request For GetApprovalRequirements : ${JSON.stringify(requestBody)} `)
 
         
-        const requirement = await SterlingTokenContract.getrequiredapprovals(requestBody.requirement, Config.SuperAdmin)
+        const requirement = await SharesTokenContract.getrequiredapprovals(requestBody.requirement, Config.SuperAdmin)
         GetLoggerInstance().info(`Response from web3 getrequiredapprovals : ${JSON.stringify(requirement)}`)
 
         GetLoggerInstance().info(`Outgoing Response To GetApprovalRequirements Request : ${JSON.stringify({requirement})} `)
@@ -345,13 +345,13 @@ const settingsController = {
                 const cscs = await AllocationModel.find({username : user.username}).select({cscs : 0}).exec()
 
                 // move all user shares in escrow back to user share wallet
-                await SterlingTokenContract.moveEscrow(user.address)
+                await SharesTokenContract.moveEscrow(user.address)
 
                 // Cancel all user open trades 
                 const openTrades = await TradeModel.find({userId : user._id, isOpen : true, windowId : tradingWindow._id})
                 if(openTrades.length > 0) {
                   openTrades.forEach(async (trade) => {
-                    // await SterlingTokenContract.transferFrom(user.address, user.address, trade.volume)
+                    // await SharesTokenContract.transferFrom(user.address, user.address, trade.volume)
                     const tradeToCancel = await TradeModel.findOne({_id : trade._id})
                     tradeToCancel.isCancel = true
                     tradeToCancel.isOpen = false
@@ -360,7 +360,7 @@ const settingsController = {
                 }
 
                 // Get user current share balance to be exported
-                let shareWallet = await SterlingTokenContract.balanceOf(user.address)
+                let shareWallet = await SharesTokenContract.balanceOf(user.address)
                 GetLoggerInstance().info(`Response from web3 balanceOf : ${JSON.stringify(shareWallet)}`)
                 
                 dataToExport.push({
@@ -371,7 +371,7 @@ const settingsController = {
                 })
 
                 // Re-initialize users share balance to zero
-                await SterlingTokenContract.zeroBalance(user.address)
+                await SharesTokenContract.zeroBalance(user.address)
                 
                 if (i == users.length - 1) {
                   return resolve(dataToExport)

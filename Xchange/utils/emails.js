@@ -12,7 +12,7 @@ exports.EmailDetails = (partialBody) => {
             <meta name="description" content="">
             <meta name="author" content="">
             <link href="https://fonts.googleapis.com/css?family=Muli:200" rel="stylesheet">
-            <title>Sterling Shares</title>
+            <title>Shares Shares</title>
         </head>
 
         <body style="max-width: 600px;margin: 10px auto;padding: 70px;border: 1px solid #ccc;background: #ffffff;color: #4e4e4e;font-family: Muli;">
@@ -23,7 +23,7 @@ exports.EmailDetails = (partialBody) => {
                 ${partialBody}
                 <p style="margin-bottom: 2em;line-height: 26px;font-size: 14px;">
                     Cheers, <br>
-                    The Sterling Shares Team
+                    The Shares Shares Team
                 </p>
             </div>
         </body>

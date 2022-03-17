@@ -1,5 +1,5 @@
-const getters = require('../services/WEB3/getterApi.js');
-const setters = require('../services/WEB3/setterApi.js');
+const getters = require('../WEB3/getterApi.js');
+const setters = require('../WEB3/setterApi.js');
 
 
  

@@ -1,12 +1,12 @@
-﻿const SterlingShares = artifacts.require('SterlingShares');
+﻿const SharesShares = artifacts.require('SharesShares');
 const assert = require('chai').assert;
 const truffleAssert = require('truffle-assertions');
 
 
-contract('SterlingShares', accounts => {
+contract('SharesShares', accounts => {
 
   beforeEach(async ()=>{
-      this.token = await SterlingShares.new()
+      this.token = await SharesShares.new()
   });
 
      it("Is able to generate token mint successfully", async ()=>{

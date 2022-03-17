@@ -6,7 +6,7 @@ import "./Libs/Safemath.sol";
 import "./MultiSigWallet.sol";
 
 
-contract SterlingShares is Initializable, Context, IERC20, MultiSigWallet {
+contract Asset is Initializable, Context, IERC20, MultiSigWallet {
     using SafeMath for uint256;
 
     //Events

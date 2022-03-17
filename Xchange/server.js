@@ -30,7 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// var whitelist = ['https://pass.sterling.ng', 'http://localhost', 'https://localhost', 'http://127.0.0.1']
+// var whitelist = ['https://pass.Shares.ng', 'http://localhost', 'https://localhost', 'http://127.0.0.1']
 // var corsOptionsDelegate = function (req, callback) {
 //   var corsOptions;
 //   if (whitelist.indexOf(req.header('Origin')) !== -1) {

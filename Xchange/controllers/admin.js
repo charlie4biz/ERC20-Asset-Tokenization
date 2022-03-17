@@ -1,6 +1,6 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, AddToCache, GetFromCache, AddOrUpdateUserCache } = require('../utils')
 const { WalletModel, UserModel, TransactionModel } = require('../models')
-const { SterlingTokenContract } = require('../services')
+const { SharesTokenContract } = require('../services')
 const AdminController = {
 
   /**
@@ -74,7 +74,7 @@ const AdminController = {
         }
 
         // update blockchain record
-        const chainResponse = await SterlingTokenContract.addAdmin(user.address, req.authUser.address)
+        const chainResponse = await SharesTokenContract.addAdmin(user.address, req.authUser.address)
         GetLoggerInstance().info(`Response from web3 addAdmin : ${JSON.stringify(chainResponse)}`)
         user.userRole = UserModel.UserType.ADMIN
         await user.save()
@@ -116,7 +116,7 @@ const AdminController = {
         }
 
         // update blockchain record
-        const chainResponse = await SterlingTokenContract.removeAdmin(user.address, req.authUser.address)
+        const chainResponse = await SharesTokenContract.removeAdmin(user.address, req.authUser.address)
         GetLoggerInstance().info(`Response from web3 addAdmin : ${JSON.stringify(chainResponse)}`)
         user.userRole = UserModel.UserType.USER
         await user.save()

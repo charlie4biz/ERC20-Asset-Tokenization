@@ -1,3 +1,6 @@
+# For Asset and security tokenization using ERC20 with Authorization using Multi-sig Approvers
+
+## To-Do
 ## To-Do List
 - [x] Create Proxy contract for upgradeability
 - [x] Separate Contract database from the Logic Contracts
@@ -12,7 +15,7 @@
 - [x] Get Lien and Tradeable token balances
 - [x] Change from public to internal TotalBalances
 
-## Sterling Blockchain
+## Shares Blockchain
 - [x] Hosted on Azure Blockchain Service
 - [x] Private Consortium Blockchain network
 - [x] Quorum Protocol for Enterprise Blockchain

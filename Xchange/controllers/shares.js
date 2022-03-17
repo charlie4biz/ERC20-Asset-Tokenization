@@ -1,6 +1,6 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Decrypt, RabbitMQService, Config } = require('../utils');
 const { TransactionModel, SharePriceModel, UserModel } = require('../models');
-const { SterlingTokenContract, ADUserByStaffId } = require('../services');
+const { SharesTokenContract, ADUserByStaffId } = require('../services');
 const bcrypt = require("bcrypt");
 
 const shareController = {
@@ -17,7 +17,7 @@ const shareController = {
             let responseBody = {}
 
             // Get Shares Wallet Info
-            const sharesWallet = await SterlingTokenContract.balanceOf(req.authUser.address)
+            const sharesWallet = await SharesTokenContract.balanceOf(req.authUser.address)
             GetLoggerInstance().info(`Response from web3 balanceOf : ${JSON.stringify(sharesWallet)}`)
 
             // Response Body
@@ -129,7 +129,7 @@ const shareController = {
               return next(response.PlainError(Errors.NOTACTIVEERR, HttpStatus.NOT_FOUND, GetCodeMsg(Errors.NOTACTIVEERR), {error : "User Has Not Been Activated On The Platform"}))
             }
 
-            let balance = await SterlingTokenContract.balanceOf(req.authUser.address) 
+            let balance = await SharesTokenContract.balanceOf(req.authUser.address) 
             if (parseInt(balance) < volume) {
                 return next(response.PlainError(Errors.INSUFICIENTFUND, HttpStatus.NOT_FOUND, GetCodeMsg(Errors.INSUFICIENTFUND), {error : "User Has Insufficient Shares Balance"}))
             }
@@ -142,7 +142,7 @@ const shareController = {
 
             let chainPass = await Decrypt(req.authUser.password)
             GetLoggerInstance().info(`Request from web3 transfer : ${user.address, volume, req.authUser.address, chainPass}`)
-            let chainResponse = await SterlingTokenContract.transfer(user.address, volume, req.authUser.address, chainPass)
+            let chainResponse = await SharesTokenContract.transfer(user.address, volume, req.authUser.address, chainPass)
             GetLoggerInstance().info(`Response from web3 transfer : ${JSON.stringify(chainResponse)}`)
 
             const shareprice = await SharePriceModel.findOne().exec()

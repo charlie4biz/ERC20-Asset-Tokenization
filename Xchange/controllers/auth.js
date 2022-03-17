@@ -1,4 +1,4 @@
-const { ADLogin, SterlingTokenContract } = require('../services');
+const { ADLogin, SharesTokenContract } = require('../services');
 const { ApiResponse, DeSensitizeUser, Encrypt, HttpStatus, CreateToken, GeneratePassword, GetCodeMsg, Errors, GetLoggerInstance, RabbitMQService } = require('../utils');
 const { WalletModel, UserModel } = require('../models');
 const bcrypt = require("bcrypt");
@@ -42,7 +42,7 @@ const AuthController = {
       const transactionPin = await bcrypt.hash(requestBody.transactionPin, 10)
 
       // Call blockchain library to profile user
-      const contractResult = await SterlingTokenContract.createAccount(blockchainPass)
+      const contractResult = await SharesTokenContract.createAccount(blockchainPass)
       GetLoggerInstance().info(`Response from web3 createAccount : ${JSON.stringify(contractResult)}`)
 
       // Create User Wallet

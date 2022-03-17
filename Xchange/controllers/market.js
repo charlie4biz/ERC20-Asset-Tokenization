@@ -1,6 +1,6 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, Random, Decrypt, RabbitMQService } = require('../utils');
 const { SharesModel, AdminSettingsModel, TransactionModel, TradeModel, TradingWindowModel, WalletModel, UserModel, SharePriceModel } = require('../models');
-const { VerifyAccount, Transfer, ADDetails, GetAccountInfo, IBSTransfer, IbsTransfer, SterlingTokenContract } = require('../services');
+const { VerifyAccount, Transfer, ADDetails, GetAccountInfo, IBSTransfer, IbsTransfer, SharesTokenContract } = require('../services');
 const bcrypt = require("bcrypt");
 const async = require("async");
 
@@ -327,19 +327,19 @@ const MarketController = {
                 return next(response.PlainError(Errors.ZEROTRADE, HttpStatus.NOT_FOUND, GetCodeMsg(Errors.ZEROTRADE), {error : "Zero Trade Not Allow"}))
             }
 
-            let balance = await SterlingTokenContract.balanceOf(req.authUser.address) 
+            let balance = await SharesTokenContract.balanceOf(req.authUser.address) 
             if (parseInt(balance) < quantity) {
                 return next(response.PlainError(Errors.INSUFICIENTFUND, HttpStatus.NOT_FOUND, GetCodeMsg(Errors.INSUFICIENTFUND), {error : "User Does Not Exist"}))
             }
             
-            let allowance = await SterlingTokenContract.allowance(req.authUser.address, Config.SuperAdmin)
+            let allowance = await SharesTokenContract.allowance(req.authUser.address, Config.SuperAdmin)
             let chainPass = await Decrypt(req.authUser.password)
             let chainResponse
             GetLoggerInstance().info(`Request from web3 approve / increaseAllowance : ${Config.SuperAdmin, quantity, req.authUser.address, chainPass}`)
             if (parseInt(allowance) <= 0) {
-                chainResponse = await SterlingTokenContract.approve(Config.SuperAdmin, quantity, req.authUser.address, chainPass)
+                chainResponse = await SharesTokenContract.approve(Config.SuperAdmin, quantity, req.authUser.address, chainPass)
             }else{
-                chainResponse = await SterlingTokenContract.increaseAllowance(Config.SuperAdmin, quantity, req.authUser.address, chainPass)
+                chainResponse = await SharesTokenContract.increaseAllowance(Config.SuperAdmin, quantity, req.authUser.address, chainPass)
             }
             GetLoggerInstance().info(`Response from web3 approve / increaseAllowance : ${JSON.stringify(chainResponse)}`)
            
@@ -507,12 +507,12 @@ const MarketController = {
             }
 
             if (tradeOffer.type == TradeModel.Type.SELL) {
-                let allowance = await SterlingTokenContract.allowance(req.authUser.address, Config.SuperAdmin)
+                let allowance = await SharesTokenContract.allowance(req.authUser.address, Config.SuperAdmin)
                 if (parseInt(allowance) <= 0) {
                     return next(response.PlainError(Errors.WEBLIBRARYERROR, HttpStatus.SERVER_ERROR, GetCodeMsg(Errors.WEBLIBRARYERROR), {error : "Insufficient balance in share escrow account"}))
                 }else{
                     GetLoggerInstance().info(`Request to web3 transferFrom : ${req.authUser.address, req.authUser.address, tradeOffer.volume}`)
-                    let chainResponse = await SterlingTokenContract.transferFrom(req.authUser.address, req.authUser.address, tradeOffer.volume)
+                    let chainResponse = await SharesTokenContract.transferFrom(req.authUser.address, req.authUser.address, tradeOffer.volume)
                     GetLoggerInstance().info(`Response from web3 transferFrom : ${JSON.stringify(chainResponse)}`)
                 }
             }
@@ -594,7 +594,7 @@ const MarketController = {
             }
             
             // Ensures Seller Has Sufficiently Enough Shares In Escrow To Transfer
-            let allowance = await SterlingTokenContract.allowance(sellerInfo.address, Config.SuperAdmin)
+            let allowance = await SharesTokenContract.allowance(sellerInfo.address, Config.SuperAdmin)
             if (parseInt(allowance) <= 0) {
                 return next(response.PlainError(Errors.WEBLIBRARYERROR, HttpStatus.SERVER_ERROR, GetCodeMsg(Errors.WEBLIBRARYERROR), {error : "Insufficient balance in share escrow account"}))
             }
@@ -602,7 +602,7 @@ const MarketController = {
             // debit seller share wallet and credit buyer share wallet
             console.log("quantity >> ", quantity)
             GetLoggerInstance().info(`Request to web3 transferFrom : ${sellerInfo.address, req.authUser.address, quantity}`)
-            let chainResponse = await SterlingTokenContract.transferFrom(sellerInfo.address, req.authUser.address, quantity)
+            let chainResponse = await SharesTokenContract.transferFrom(sellerInfo.address, req.authUser.address, quantity)
             GetLoggerInstance().info(`Response from web3 transferFrom : ${JSON.stringify(chainResponse)}`)
         
             // debit buyer fiat wallet and credit seller fiat wallets
@@ -702,7 +702,7 @@ const MarketController = {
            }
 
            // Ensures Seller Has Enough Shares To Sell
-           let sellerBalance = await SterlingTokenContract.balanceOf(req.authUser.address)
+           let sellerBalance = await SharesTokenContract.balanceOf(req.authUser.address)
            if (parseInt(sellerBalance) < quantity) {
                 return next(response.PlainError(Errors.LIMITFUNDS412, HttpStatus.SERVER_ERROR, GetCodeMsg(Errors.LIMITFUNDS412), {error : "Insufficient balance in seller share account"}))
            }
@@ -718,7 +718,7 @@ const MarketController = {
            // debit seller share wallet and credit buyer share wallet
             let chainPass = await Decrypt(req.authUser.password)
             GetLoggerInstance().info(`Request to web3 transfer : ${buyerInfo.address, quantity, req.authUser.address, chainPass}`)
-            let chainResponse = await SterlingTokenContract.transfer(buyerInfo.address, quantity, req.authUser.address, chainPass)
+            let chainResponse = await SharesTokenContract.transfer(buyerInfo.address, quantity, req.authUser.address, chainPass)
             GetLoggerInstance().info(`Response from web3 transfer : ${JSON.stringify(chainResponse)}`)
        
            // debit buyer fiat wallet and credit seller fiat wallets
@@ -802,7 +802,7 @@ const MarketController = {
              price = setMarketPrice
             }else{
             shareprice = await SharePriceModel.findOne().exec()
-            //Get sterling share market-value from NSE
+            //Get Shares share market-value from NSE
              price = shareprice.price
             }
 
@@ -851,7 +851,7 @@ const MarketController = {
                 let sharesBuyBack = parseInt(openTrade.volume)
                 
                 // Ensures Seller Has Enough Shares To Sell
-                let sellerBalance = await SterlingTokenContract.balanceOf(sellerInfo.address)
+                let sellerBalance = await SharesTokenContract.balanceOf(sellerInfo.address)
                 if (parseInt(sellerBalance) < sharesBuyBack) {
                     return next(response.PlainError(Errors.LIMITFUNDS412, HttpStatus.SERVER_ERROR, GetCodeMsg(Errors.LIMITFUNDS412), {error : "Insufficient balance in seller share account"}))
                 }
@@ -867,7 +867,7 @@ const MarketController = {
                 //subtract newvolume from blockchain account
                 let chainPass = await Decrypt(req.authUser.password)
                 GetLoggerInstance().info(`Request to web3 decrease allowance : ${buyerInfo.address, sharesBuyBack, req.authUser.address, chainPass}`)
-                let chainResponse = await SterlingTokenContract.decreaseAllowance(Config.SuperAdmin, sharesBuyBack, sellerInfo.address, chainPass)
+                let chainResponse = await SharesTokenContract.decreaseAllowance(Config.SuperAdmin, sharesBuyBack, sellerInfo.address, chainPass)
                 GetLoggerInstance().info(`Response from web3 decrease allowance : ${JSON.stringify(chainResponse)}`)
                 
 
@@ -917,7 +917,7 @@ const MarketController = {
                 sharesBuyBack = parseInt(tradevolume / trades)
                                 
                 // Ensures Seller Has Enough Shares To Sell
-                // let sellerBalance = await SterlingTokenContract.balanceOf(sellerInfo.address)
+                // let sellerBalance = await SharesTokenContract.balanceOf(sellerInfo.address)
                 // if (parseInt(sellerBalance) < sharesBuyBack) {
                 //     return next(response.PlainError(Errors.LIMITFUNDS412, HttpStatus.SERVER_ERROR, GetCodeMsg(Errors.LIMITFUNDS412), {error : "Insufficient balance in seller share account"}))
                 // }
@@ -949,7 +949,7 @@ const MarketController = {
                 //subtract newvolume from blockchain account
                 // let chainPass = await Decrypt(req.authUser.password)
                 // GetLoggerInstance().info(`Request to web3 decrease allowance : ${buyerInfo.address, newvolume, req.authUser.address, chainPass}`)
-                // let chainResponse = await SterlingTokenContract.decreaseAllowance(Config.SuperAdmin, newvolume, sellerInfo.address, chainPass)
+                // let chainResponse = await SharesTokenContract.decreaseAllowance(Config.SuperAdmin, newvolume, sellerInfo.address, chainPass)
                 // GetLoggerInstance().info(`Response from web3 decrease allowance : ${JSON.stringify(chainResponse)}`)
 
                 // debit buyer fiat wallet and credit seller fiat wallets

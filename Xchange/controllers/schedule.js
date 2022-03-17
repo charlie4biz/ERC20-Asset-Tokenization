@@ -1,6 +1,6 @@
 const { ApiResponse, HttpStatus, GetCodeMsg, Errors, GetLoggerInstance, Config, GetFromCache, RabbitMQService, Decrypt, AddToCache } = require('../utils');
 const { UserModel, ScheduleModel, TradingWindowModel, AllocationModel } = require('../models');
-const { SterlingTokenContract } = require('../services');
+const { SharesTokenContract } = require('../services');
 const ReadExcel = require('read-excel-file/node');
 const path = require("path")
 
@@ -134,7 +134,7 @@ const scheduleController = {
                     let allPendingSchedules = []
                     for (let i = 0; i < schedules.length; i++) {
                         const schedule = schedules[i];
-                        let allApprovals = await SterlingTokenContract.getapprovals(schedule.scheduleId)
+                        let allApprovals = await SharesTokenContract.getapprovals(schedule.scheduleId)
                         if (allApprovals.approval.length < 1 || allApprovals.approval.includes(req.authUser.address) == false) {
                             allPendingSchedules.push(schedule)
                         }
@@ -280,7 +280,7 @@ const scheduleController = {
 
             switch (schedule.status) {
                 case ScheduleModel.Status.PENDING:
-                    approvals = await SterlingTokenContract.getapprovals(schedule.scheduleId)
+                    approvals = await SharesTokenContract.getapprovals(schedule.scheduleId)
                     GetLoggerInstance().info(`Response from web3 getapprovals : ${JSON.stringify(approvals)}`)
                     approvals.approval.forEach(async (approval) => {
                         let approver = await UserModel.findOne({address : approval}).select({transactionPin: 0, authToken: 0, password: 0, walletId: 0});
@@ -289,7 +289,7 @@ const scheduleController = {
                     break;
                 case ScheduleModel.Status.REJECTED:
                         // Get schedule rejection Info
-                        let rejection = await SterlingTokenContract.getrejects(schedule.scheduleId)
+                        let rejection = await SharesTokenContract.getrejects(schedule.scheduleId)
                         GetLoggerInstance().info(`Response from web3 getrejects : ${JSON.stringify(rejection)}`)
                         if (Object.entries(rejection).length !== 0) {
                             const approver = await UserModel.findOne({address : rejection.reject[0]}).select({address: 0, authToken: 0, password: 0, walletId: 0});
@@ -303,7 +303,7 @@ const scheduleController = {
                 case ScheduleModel.Status.COMPLETED:
                 case ScheduleModel.Status.INPROGRESS:
                 case ScheduleModel.Status.TERMINATED:
-                        approvals = await SterlingTokenContract.getapprovals(schedule.scheduleId)
+                        approvals = await SharesTokenContract.getapprovals(schedule.scheduleId)
                         GetLoggerInstance().info(`Response from web3 getapprovals : ${JSON.stringify(approvals)}`)
                         approvals.approval.forEach(async (approval) => {
                             let approver = await UserModel.findOne({address : approval}).select({transactionPin: 0, authToken: 0, password: 0, walletId: 0});
@@ -323,7 +323,7 @@ const scheduleController = {
                     break;
             }
 
-            let requiredApprovals = await SterlingTokenContract.getrequiredapprovals(schedule.scheduleId)
+            let requiredApprovals = await SharesTokenContract.getrequiredapprovals(schedule.scheduleId)
 
             responseBody = {
                 schedule,
@@ -404,10 +404,10 @@ const scheduleController = {
             if (req.authUser.userRole == UserModel.UserType.ADMIN) {
                 let chainPass = await Decrypt(req.authUser.password)
                 GetLoggerInstance().info(`Request from web3 createSchedule : ${scheduleAmount, req.authUser.address, chainPass}`)
-                chainResponse = await SterlingTokenContract.createSchedule(scheduleAmount, req.authUser.address, chainPass)
+                chainResponse = await SharesTokenContract.createSchedule(scheduleAmount, req.authUser.address, chainPass)
             } else {
                 GetLoggerInstance().info(`Request from web3 createSchedule : ${scheduleAmount, req.authUser.address, ""}`)
-                chainResponse = await SterlingTokenContract.createSchedule(scheduleAmount, req.authUser.address, "")
+                chainResponse = await SharesTokenContract.createSchedule(scheduleAmount, req.authUser.address, "")
             }
             GetLoggerInstance().info(`Response from web3 createSchedule : ${JSON.stringify(chainResponse)}`)
 
@@ -548,7 +548,7 @@ const scheduleController = {
             // update blockchain record 
             let chainPass = await Decrypt(req.authUser.password)
             GetLoggerInstance().info(`Request from web3 approveMint : ${chainScheduleId, true, requestBody.comment, req.authUser.address, chainPass}`)
-            let chainResponse = await SterlingTokenContract.approveMint(chainScheduleId, true, requestBody.comment, req.authUser.address, chainPass)
+            let chainResponse = await SharesTokenContract.approveMint(chainScheduleId, true, requestBody.comment, req.authUser.address, chainPass)
             GetLoggerInstance().info(`Response from web3 approveMint : ${JSON.stringify(chainResponse)}`)
 
             if (chainResponse == ScheduleModel.Status.APPROVED) {
@@ -615,7 +615,7 @@ const scheduleController = {
             let chainScheduleId = schedule.scheduleId
             let chainPass = await Decrypt(req.authUser.password)
             GetLoggerInstance().info(`Request from web3 approveMint : ${chainScheduleId, false, requestBody.comment, req.authUser.address, chainPass}`)
-            let chainResponse = await SterlingTokenContract.approveMint(chainScheduleId, false, requestBody.comment, req.authUser.address, chainPass)
+            let chainResponse = await SharesTokenContract.approveMint(chainScheduleId, false, requestBody.comment, req.authUser.address, chainPass)
             GetLoggerInstance().info(`Response from web3 approveMint : ${JSON.stringify(chainResponse)}`)
 
             schedule.status = ScheduleModel.Status.REJECTED
@@ -670,7 +670,7 @@ const scheduleController = {
             let chainScheduleId = schedule.scheduleId
             let chainPass = await Decrypt(req.authUser.password)
             GetLoggerInstance().info(`Request from web3 undoApprovalMint : ${chainScheduleId, req.authUser.address, chainPass}`)
-            let chainResponse = await SterlingTokenContract.undoApprovalMint(chainScheduleId, req.authUser.address, chainPass)
+            let chainResponse = await SharesTokenContract.undoApprovalMint(chainScheduleId, req.authUser.address, chainPass)
             GetLoggerInstance().info(`Response from web3 undoApprovalMint : ${JSON.stringify(chainResponse)}`)
             
             GetLoggerInstance().info(`Outgoing Response To undoApprovalMint Request : ${GetCodeMsg(Errors.SUCCESS)}`)
@@ -762,10 +762,10 @@ const scheduleController = {
                 if (req.authUser.userRole == UserModel.UserType.ADMIN) {
                     let chainPass = await Decrypt(req.authUser.password)
                     GetLoggerInstance().info(`Request to web3 updateSchedule : ${scheduleId, scheduleAmount, req.authUser.address, chainPass}`)
-                    chainResponse = await SterlingTokenContract.updateSchedule(scheduleId, scheduleAmount, req.authUser.address, chainPass)
+                    chainResponse = await SharesTokenContract.updateSchedule(scheduleId, scheduleAmount, req.authUser.address, chainPass)
                 } else {
                     GetLoggerInstance().info(`Request to web3 updateSchedule : ${scheduleId, scheduleAmount, req.authUser.address, ""}`)
-                    chainResponse = await SterlingTokenContract.updateSchedule(scheduleId, scheduleAmount, req.authUser.address, "")
+                    chainResponse = await SharesTokenContract.updateSchedule(scheduleId, scheduleAmount, req.authUser.address, "")
                 }
                 GetLoggerInstance().info(`Response from web3 updateSchedule : ${JSON.stringify(chainResponse)}`)
                 schedule.volume = scheduleAmount
